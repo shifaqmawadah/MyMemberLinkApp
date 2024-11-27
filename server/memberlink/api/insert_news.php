@@ -17,25 +17,21 @@ if (!isset($_POST)) {
 }
 
 include_once("dbconnect.php");
+$title = addslashes($_POST['title']);
+$details =addslashes( $_POST['details']);
 
-$email = $_POST['email'];
-$password = sha1($_POST['password']);
+$sqlinsertnews="INSERT INTO `tbl_news`(`news_title`, `news_details`) VALUES ('$title','$details')";
 
-$sqllogin = "SELECT `admin_email`, `admin_pass` FROM `tbl_admins` WHERE `admin_email` = '$email' AND `admin_pass` = '$password'";
-$result = $conn->query($sqllogin);
-
-if ($result) { // Check if query execution is successful
-    if ($result->num_rows > 0) {
-        $response = array('status' => 'success', 'data' => null);
-    } else {
-        $response = array('status' => 'failed', 'message' => 'Invalid email or password');
-    }
-} else {
-    $response = array('status' => 'failed', 'message' => 'Database query failed');
+if ($conn->query($sqlinsertnews) === TRUE) {
+	$response = array('status' => 'success', 'data' => null);
+    sendJsonResponse($response);
+}else{
+	$response = array('status' => 'failed', 'data' => null);
+	sendJsonResponse($response);
 }
-
-sendJsonResponse($response); // Send a single response at the end
 	
+	
+
 function sendJsonResponse($sentArray)
 {
     header('Content-Type: application/json');

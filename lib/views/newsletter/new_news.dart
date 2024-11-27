@@ -27,54 +27,52 @@ class _NewNewsScreenState extends State<NewNewsScreen> {
         title: const Text("New Newsletter"),
       ),
       body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Column(
-            children: [
-              TextField(
-                  controller: titleController,
-                  decoration: const InputDecoration(
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(10)),
-                      ),
-                      hintText: "News Title")),
-              const SizedBox(
-                height: 10,
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          children: [
+            TextField(
+                controller: titleController,
+                decoration: const InputDecoration(
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(10)),
+                    ),
+                    hintText: "News Title")),
+            const SizedBox(
+              height: 10,
+            ),
+            SizedBox(
+              height: screenHeight * 0.7,
+              child: TextField(
+                controller: detailsController,
+                decoration: const InputDecoration(
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(10)),
+                    ),
+                    hintText: "News Details"),
+                maxLines: screenHeight ~/ 35,
               ),
-              SizedBox(
-                height: screenHeight * 0.7,
-                child: TextField(
-                  controller: detailsController,
-                  decoration: const InputDecoration(
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(10)),
-                      ),
-                      hintText: "News Details"),
-                  maxLines: screenHeight ~/ 35,
+            ),
+            const SizedBox(
+              height: 20,
+            ),
+            MaterialButton(
+              elevation: 10,
+              onPressed: onInsertNewsDialog,
+              minWidth: screenWidth,
+              height: 50,
+              color: Theme.of(context)
+                  .colorScheme
+                  .secondary, // Uses primary color from theme
+              child: Text(
+                "Insert",
+                style: TextStyle(
+                  color: Theme.of(context)
+                      .colorScheme
+                      .onSecondary, // Text color matches onPrimary color
                 ),
               ),
-              const SizedBox(
-                height: 20,
-              ),
-              MaterialButton(
-                elevation: 10,
-                onPressed: onInsertNewsDialog,
-                minWidth: screenWidth,
-                height: 50,
-                color: Theme.of(context)
-                    .colorScheme
-                    .secondary, // Uses primary color from theme
-                child: Text(
-                  "Insert",
-                  style: TextStyle(
-                    color: Theme.of(context)
-                        .colorScheme
-                        .onSecondary, // Text color matches onPrimary color
-                  ),
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -132,7 +130,7 @@ class _NewNewsScreenState extends State<NewNewsScreen> {
     String title = titleController.text;
     String details = detailsController.text;
     http.post(
-        Uri.parse("${MyConfig.servername}/memberlink/api/insert_news.php"),
+        Uri.parse("${MyConfig.servername}/MyMemberLink/insert_news.php"),
         body: {"title": title, "details": details}).then((response) {
       if (response.statusCode == 200) {
         var data = jsonDecode(response.body);

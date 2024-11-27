@@ -11,8 +11,9 @@ class RegisterScreen extends StatefulWidget {
 }
 
 class _RegisterScreenState extends State<RegisterScreen> {
-  TextEditingController emailcontroller = TextEditingController();
-  TextEditingController passwordcontroller = TextEditingController();
+  TextEditingController emailController = TextEditingController();
+  TextEditingController passwordController = TextEditingController();
+  bool isPasswordHidden = true;
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +27,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
               children: [
                 Image.asset('assets/images/login.png'),
                 TextField(
-                  controller: emailcontroller,
+                  controller: emailController,
                   keyboardType: TextInputType.emailAddress,
                   decoration: const InputDecoration(
                     border: OutlineInputBorder(
@@ -37,13 +38,25 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ),
                 const SizedBox(height: 10),
                 TextField(
-                  obscureText: true,
-                  controller: passwordcontroller,
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(
+                  obscureText: isPasswordHidden,
+                  controller: passwordController,
+                  decoration: InputDecoration(
+                    border: const OutlineInputBorder(
                       borderRadius: BorderRadius.all(Radius.circular(10)),
                     ),
                     hintText: "Your Password",
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        isPasswordHidden
+                            ? Icons.visibility_off
+                            : Icons.visibility,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          isPasswordHidden = !isPasswordHidden;
+                        });
+                      },
+                    ),
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -74,8 +87,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   void onRegisterDialog() {
-    String email = emailcontroller.text;
-    String password = passwordcontroller.text;
+    String email = emailController.text;
+    String password = passwordController.text;
     if (email.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text("Please enter email and password"),
@@ -88,21 +101,23 @@ class _RegisterScreenState extends State<RegisterScreen> {
       builder: (BuildContext context) {
         return AlertDialog(
           shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(20.0))),
-          title: const Text("Register new account?", style: TextStyle()),
-          content: const Text("Are you sure?", style: TextStyle()),
+            borderRadius: BorderRadius.all(Radius.circular(20.0)),
+          ),
+          title: const Text("Register new account?"),
+          content: const Text("Are you sure?"),
           actions: <Widget>[
             TextButton(
-              child: const Text("Yes", style: TextStyle()),
+              child: const Text("Yes"),
               onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog first
+                Navigator.of(context).pop(); // Close dialog first
                 userRegistration();
               },
             ),
             TextButton(
-              child: const Text("No", style: TextStyle()),
+              child: const Text("No"),
               onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
+                Navigator.of(context).pop();
+                clearFields(); // Clear fields even when registration is canceled
               },
             ),
           ],
@@ -111,48 +126,28 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 
-  Future<void> userRegistration() async {
-    String email = emailcontroller.text;
-    String pass = passwordcontroller.text;
+  void userRegistration() async {
+    String email = emailController.text;
+    String pass = passwordController.text;
 
     try {
       final response = await http.post(
         Uri.parse("${MyConfig.servername}/MyMemberLink/register_user.php"),
         body: {"email": email, "password": pass},
+        headers: {"Content-Type": "application/x-www-form-urlencoded"}, // Ensure correct headers
       );
 
-      print("Response status: ${response.statusCode}");
-      print("Response body: ${response.body}"); // Print raw response for debugging
-
-      // Check if the response is valid JSON
       if (response.statusCode == 200) {
-        try {
-          var data = jsonDecode(response.body); // Decode the JSON response
-          print('Decoded JSON: $data'); // Print decoded data to check
-
-          if (data['status'] == 'success') {
-            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-              content: Text("Registration Success"),
-              backgroundColor: Color.fromARGB(255, 12, 12, 12),
-            ));
-            // Clear the input fields
-            emailcontroller.clear();
-            passwordcontroller.clear();
-          } else if (data['status'] == 'email_exists') {
-            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-              content: Text("Email already in use"),
-              backgroundColor: Colors.red,
-            ));
-          } else {
-            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-              content: Text("Registration Failed"),
-              backgroundColor: Colors.red,
-            ));
-          }
-        } catch (e) {
-          print("Error parsing response: $e"); // Log parsing error
+        var data = jsonDecode(response.body);
+        if (data['status'] == "success") {
           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-            content: Text("Error parsing response"),
+            content: Text("Registration Successful"),
+            backgroundColor: Colors.green,
+          ));
+          clearFields(); // Clear fields after success
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text("Registration Failed: ${data['message']}"),
             backgroundColor: Colors.red,
           ));
         }
@@ -164,9 +159,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text("Error: ${e.toString()}"),
+        content: Text("Error: $e"),
         backgroundColor: Colors.red,
       ));
     }
+  }
+
+  void clearFields() {
+    emailController.clear();
+    passwordController.clear();
+    setState(() {}); // Ensure UI is updated
   }
 }

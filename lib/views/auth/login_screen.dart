@@ -1,11 +1,10 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:my_member_link/myconfig.dart';
-import 'package:my_member_link/views/main_screen.dart';
-import 'package:my_member_link/views/register_screen.dart';
+import 'package:my_member_link/views/newsletter/news_screen.dart'; // Assuming MainScreen or your target screen
+import 'package:my_member_link/views/auth/register_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
-import 'package:my_member_link/views/forget_password_screen.dart'; // Import ForgotPasswordScreen
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -18,9 +17,7 @@ class _LoginScreenState extends State<LoginScreen> {
   TextEditingController emailcontroller = TextEditingController();
   TextEditingController passwordcontroller = TextEditingController();
   bool rememberme = false;
-  
-  // Step 1: Add a boolean variable to track password visibility
-  bool _obscureText = true;
+  bool _obscureText = true;  // Toggle for password visibility
 
   @override
   void initState() {
@@ -50,10 +47,9 @@ class _LoginScreenState extends State<LoginScreen> {
                 const SizedBox(
                   height: 10,
                 ),
-                // Step 2: Use the _obscureText variable to toggle password visibility
                 TextField(
-                  controller: passwordcontroller,
                   obscureText: _obscureText,
+                  controller: passwordcontroller,
                   decoration: InputDecoration(
                       border: const OutlineInputBorder(
                         borderRadius: BorderRadius.all(Radius.circular(10)),
@@ -61,11 +57,9 @@ class _LoginScreenState extends State<LoginScreen> {
                       hintText: "Your Password",
                       suffixIcon: IconButton(
                         icon: Icon(
-                          _obscureText ? Icons.visibility : Icons.visibility_off, 
-                          color: Colors.blue,
+                          _obscureText ? Icons.visibility : Icons.visibility_off,
                         ),
                         onPressed: () {
-                          // Step 3: Toggle the password visibility
                           setState(() {
                             _obscureText = !_obscureText;
                           });
@@ -116,19 +110,8 @@ class _LoginScreenState extends State<LoginScreen> {
                 const SizedBox(
                   height: 20,
                 ),
-                // Make "Forgot Password?" clickable
                 GestureDetector(
-                  onTap: () {
-                    // Navigate to ForgotPasswordScreen
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => ForgotPasswordScreen()),
-                    );
-                  },
-                  child: const Text(
-                    "Forgot Password?",
-                    style: TextStyle(color: Colors.blue),
-                  ),
+                  child: const Text("Forgot Password?"),
                 ),
                 const SizedBox(
                   height: 20,
@@ -150,35 +133,53 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  void onLogin() {
-    String email = emailcontroller.text;
-    String password = passwordcontroller.text;
-    if (email.isEmpty || password.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text("Please enter email and password"),
-      ));
-      return;
-    }
-    http.post(Uri.parse("${MyConfig.servername}/MyMemberLink/login_user.php"),
-        body: {"email": email, "password": password}).then((response) {
-      if (response.statusCode == 200) {
-        var data = jsonDecode(response.body);
-        if (data['status'] == "success") {
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-            content: Text("Login Success"),
-            backgroundColor: Color.fromARGB(255, 12, 12, 12),
-          ));
-          Navigator.push(context,
-              MaterialPageRoute(builder: (content) => const MainScreen()));
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-            content: Text("Login Failed"),
-            backgroundColor: Colors.red,
-          ));
-        }
-      }
-    });
+  void onLogin() async {
+  String email = emailcontroller.text;
+  String password = passwordcontroller.text;
+
+  if (email.isEmpty || password.isEmpty) {
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+      content: Text("Please enter email and password"),
+      backgroundColor: Colors.red,
+    ));
+    return;
   }
+
+  try {
+    final response = await http.post(
+      Uri.parse("${MyConfig.servername}/MyMemberLink/login_user.php"),
+      body: {"email": email, "password": password},
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      if (data['status'] == "success") {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text("Login Success"),
+          backgroundColor: Colors.green,
+        ));
+        Navigator.pushReplacement(
+            context, MaterialPageRoute(builder: (content) => const MainScreen()));
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(data['message'] ?? "Login Failed"),
+          backgroundColor: Colors.red,
+        ));
+      }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text("Server Error. Please try again."),
+        backgroundColor: Colors.red,
+      ));
+    }
+  } catch (error) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text("Network Error: $error"),
+      backgroundColor: Colors.red,
+    ));
+  }
+}
+
 
   Future<void> storeSharedPrefs(bool value, String email, String pass) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -214,4 +215,5 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() {});
   }
 }
+
 
