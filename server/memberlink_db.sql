@@ -67,6 +67,10 @@ INSERT INTO `tbl_news` (`news_id`, `news_title`, `news_details`, `news_date`) VA
 (4, 'Special Offer for Loyal Members!', 'Thank you for being a valued member! As a token of our appreciation, enjoy a special 15% discount on all renewals this month. Make sure to use the code MEMBER15 at checkout. Don’t miss out on this limited-time offer!', '2024-10-30 16:25:45.383816');
 
 --
+-- Table structure for table `tbl_products`
+--
+
+--
 -- Indexes for dumped tables
 --
 
@@ -99,6 +103,12 @@ ALTER TABLE `tbl_admins`
 ALTER TABLE `tbl_news`
   MODIFY `news_id` int(3) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 COMMIT;
+
+--
+-- AUTO_INCREMENT for table `tbl_products`
+--
+ALTER TABLE `tbl_products`
+  MODIFY `product_id` int(3) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;

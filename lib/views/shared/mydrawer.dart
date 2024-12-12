@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:my_member_link/views/events/event_screen.dart';
 import 'package:my_member_link/views/newsletter/news_screen.dart';
+import 'package:my_member_link/views/product/product_screen.dart';
 
 class MyDrawer extends StatelessWidget {
   const MyDrawer({super.key});
@@ -14,7 +15,7 @@ class MyDrawer extends StatelessWidget {
             decoration: BoxDecoration(
                 // You can add color or other styling here if needed
                 ),
-            child: Text('Drawer Header'),
+            child: Text('Menu'),
           ),
           ListTile(
             onTap: () {
@@ -54,25 +55,7 @@ class MyDrawer extends StatelessWidget {
               Navigator.pop(context);
               Navigator.push(
                 context,
-                PageRouteBuilder(
-                  pageBuilder: (context, animation, secondaryAnimation) =>
-                      const EventScreen(),
-                  transitionsBuilder:
-                      (context, animation, secondaryAnimation, child) {
-                    const begin = Offset(1.0, 0.0); // Slide in from the right
-                    const end = Offset.zero;
-                    const curve = Curves.ease;
-
-                    var tween = Tween(begin: begin, end: end)
-                        .chain(CurveTween(curve: curve));
-                    var offsetAnimation = animation.drive(tween);
-
-                    return SlideTransition(
-                      position: offsetAnimation,
-                      child: child,
-                    );
-                  },
-                ),
+                MaterialPageRoute(builder: (context) => const EventScreen()),
               );
 
               // Navigator.push(context,
@@ -85,8 +68,16 @@ class MyDrawer extends StatelessWidget {
           const ListTile(
             title: Text("Payments"),
           ),
-          const ListTile(
-            title: Text("Products"),
+          ListTile(
+            title: const Text("Products"),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const ProductScreen()),
+                );
+
+            },
           ),
           const ListTile(
             title: Text("Vetting"),

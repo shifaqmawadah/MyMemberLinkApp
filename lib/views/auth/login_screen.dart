@@ -154,12 +154,24 @@ class _LoginScreenState extends State<LoginScreen> {
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
       if (data['status'] == "success") {
+        String adminId = data['data']['admin_id']; // Extract admin_id
+        String adminEmail = data['data']['admin_email']; // Extract admin_email
+
+        // Store admin_id and admin_email in SharedPreferences
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setString("admin_id", adminId);
+        await prefs.setString("admin_email", adminEmail);
+
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
           content: Text("Login Success"),
           backgroundColor: Colors.green,
         ));
+
+        // Navigate to MainScreen
         Navigator.pushReplacement(
-            context, MaterialPageRoute(builder: (content) => const MainScreen()));
+          context,
+          MaterialPageRoute(builder: (content) => const MainScreen()),
+        );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text(data['message'] ?? "Login Failed"),
@@ -179,6 +191,7 @@ class _LoginScreenState extends State<LoginScreen> {
     ));
   }
 }
+
 
 
   Future<void> storeSharedPrefs(bool value, String email, String pass) async {
